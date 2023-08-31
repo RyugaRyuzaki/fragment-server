@@ -8,7 +8,8 @@
         "start": "node server.js",
         "dev": "nodemon --ignore uploads/**  server.js",
         "watch": "rollup -c -w",
-        "build": "rollup -c"
+        "build": "rollup -c",
+        "start:pm2": "pm2 start ecosystem.config.cjs --no-daemon"
     },
     "author": "",
     "license": "ISC",
