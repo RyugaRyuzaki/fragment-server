@@ -32,6 +32,7 @@ export class IfcJsonExporter {
 			if (!geometriesIDs.has(id)) {
 				try {
 					properties[id] = await webIfc.GetLine(modelID, id);
+					properties[id].type = webIfc.GetNameFromTypeCode(properties[id].type);
 				} catch (e) {
 					console.log(`Properties of the element ${id} could not be processed`);
 				}

@@ -6,7 +6,6 @@ router.post("/:fileId", async (req, res) => {
 		const { fileId } = req.params;
 		if (!fileId) return res.status(405).json({ message: "Missing param" });
 		const buffer = fs.readFileSync("uploads/" + fileId);
-
 		res.write(buffer);
 		res.write("\n\n");
 		res.end();

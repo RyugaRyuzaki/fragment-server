@@ -64,9 +64,9 @@ export class IfcLoader {
 	}
 
 	async readAllGeometries(modelID) {
-		this.api.StreamAllMeshesWithTypes(modelID, [WebIFC.IFCSPACE, WebIFC.IFCOPENINGELEMENT], (mesh) => {
-			this.geometryReader.streamMesh(mesh);
-		});
+		// this.api.StreamAllMeshesWithTypes(modelID, [ WebIFC.IFCOPENINGELEMENT], (mesh) => {
+		// 	this.geometryReader.streamMesh(mesh);
+		// });
 		this.api.StreamAllMeshes(0, (mesh) => {
 			this.geometryReader.streamMesh(mesh);
 		});

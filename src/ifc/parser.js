@@ -29,8 +29,9 @@ const upload = multer({
 });
 const root = "./src/ifc/";
 
-async function computeWorker(filename, originalname, firstModel) {
+async function computeWorker(filename, firstModel) {
 	const filePath = "uploads/" + filename;
+	const originalname = filename.split(".ifc")[0];
 	const fileData = fs.readFileSync(filePath);
 	const dataArray = new Uint8Array(fileData);
 	const worker = new Worker(root + "fragment.js", {
@@ -72,7 +73,7 @@ export default async function uploadFile(req, res) {
 			return res.status(403).json({ message: "File not found", result: false });
 		}
 		const { filename, originalname } = req.file;
-		await computeWorker(filename, originalname);
+		await computeWorker(filename, true);
 		DeleteFile(uploads, filename);
 		res.status(200).json({ filename, originalname });
 	});

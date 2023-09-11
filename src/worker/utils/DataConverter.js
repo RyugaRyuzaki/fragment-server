@@ -29,6 +29,7 @@ export class DataConverter {
 
 	cleanUp() {
 		this._fragmentKey = 0;
+		this._spatialTree.cleanUp();
 		this.categories = {};
 		this._model = new FRAGS.FragmentsGroup();
 		this._ifcCategories = new IfcCategories();
@@ -41,6 +42,7 @@ export class DataConverter {
 	}
 
 	async generate(geometries) {
+		await this._spatialTree.setUp(this.api);
 		this.createAllFragments(geometries);
 		await this.saveModelData();
 		return this._model;
@@ -106,6 +108,7 @@ export class DataConverter {
 	async getModelProperties(callback) {
 		this._propertyExporter.propertiesSerialized.on((properties) => {
 			this._model.properties = properties;
+			this._model.properties.spatialTree = this._spatialTree.itemsByFloor;
 			callback(properties);
 		});
 		this._propertyExporter.export(this.api, 0);
