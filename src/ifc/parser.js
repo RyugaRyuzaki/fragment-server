@@ -1,8 +1,8 @@
 import fs from "fs";
+import * as pako from "pako";
 import multer from "multer";
 import { Worker } from "worker_threads";
 import DeleteFile from "./util.js";
-
 const uploads = "uploads";
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
@@ -40,10 +40,10 @@ async function computeWorker(filename, firstModel) {
 	// listen worker
 	worker.on("message", async ({ result, arrayBuffer, properties }) => {
 		if (result && arrayBuffer && properties) {
-			const jsonData = JSON.stringify(properties, null, 2);
-			// write a file in uploads
-			await fs.writeFileSync(uploads + "/" + originalname + ".json", jsonData);
-			await fs.writeFileSync(uploads + "/" + originalname + ".frag", Buffer.from(arrayBuffer));
+			const compressedData = pako.deflate(JSON.stringify(properties));
+			const compressedFrag = pako.deflate(Buffer.from(arrayBuffer));
+			await fs.writeFileSync(uploads + "/" + originalname + ".gz", compressedData);
+			await fs.writeFileSync(uploads + "/" + originalname + "frag.gz", compressedFrag);
 		}
 	});
 	// if error
@@ -58,6 +58,10 @@ async function computeWorker(filename, firstModel) {
 		}
 	});
 }
+// we can use pako npm to zip file, as you can see the ifc file 80mb and data when we zip ~12mb
+// so we can download easy and supper fast
+// i copy idea from xeokit
+// we can load from data and visualiz intersect wit diagram like barcha or circle
 
 export default async function uploadFile(req, res) {
 	upload.single("file")(req, res, async (err) => {
@@ -78,3 +82,20 @@ export default async function uploadFile(req, res) {
 		res.status(200).json({ filename, originalname });
 	});
 }
+// clone repo
+// install packages
+// run server : npm run dev
+// make sure install visual studio 2022
+// install office/sharepoint
+// open visual studio
+// create a project, choose template
+// wait some time to create a project
+// now project is loaded
+// we care about manifest file and xml file
+// now, run to test
+// we can not change width via code
+// let change some thing
+// because when we upload to server, we storage
+//1 ifc file
+//2 convert ifc to .frag
+// 3 properties of file to json

@@ -67,7 +67,7 @@ export class IfcLoader {
 		// this.api.StreamAllMeshesWithTypes(modelID, [ WebIFC.IFCOPENINGELEMENT], (mesh) => {
 		// 	this.geometryReader.streamMesh(mesh);
 		// });
-		this.api.StreamAllMeshes(0, (mesh) => {
+		this.api.StreamAllMeshes(modelID, (mesh) => {
 			this.geometryReader.streamMesh(mesh);
 		});
 	}

@@ -108,7 +108,7 @@ export class DataConverter {
 	async getModelProperties(callback) {
 		this._propertyExporter.propertiesSerialized.on((properties) => {
 			this._model.properties = properties;
-			this._model.properties.spatialTree = this._spatialTree.itemsByFloor;
+			// this._model.properties.spatialTree = this._spatialTree.itemsByFloor;
 			callback(properties);
 		});
 		this._propertyExporter.export(this.api, 0);

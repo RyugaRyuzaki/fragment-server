@@ -4,6 +4,7 @@ import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from "three-
 
 export class GeometryReader {
 	items = {};
+	items = {};
 	constructor(api) {
 		this.api = api;
 		this.BVH = new BvhManager();

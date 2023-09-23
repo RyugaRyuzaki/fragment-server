@@ -103,3 +103,5 @@ export class SpatialStructure {
 		this.itemsByFloor = {};
 	}
 }
+// they storage via dbId
+// maybe diffiren ifc
