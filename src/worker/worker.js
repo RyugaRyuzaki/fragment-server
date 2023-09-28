@@ -1,6 +1,7 @@
 import { workerData, parentPort } from "worker_threads";
 import * as WebIFC from "web-ifc";
 import { IfcLoader } from "./ifc";
+const wasmPath = "https://unpkg.com/web-ifc@0.0.44/";
 const getData = async ({ dataArray, firstModel }) => {
 	try {
 		const api = new WebIFC.IfcAPI();
@@ -8,7 +9,7 @@ const getData = async ({ dataArray, firstModel }) => {
 		// we can not copy .wasm files in node_modules/we-ifc to same directory this file
 		// if we set : api.SetWasmPath("./") and copy those file in same directory this file
 		// we will get the error : can not compile url
-		api.SetWasmPath("https://unpkg.com/web-ifc@0.0.42/");
+		api.SetWasmPath(wasmPath);
 		const ifcLoader = new IfcLoader(api, parentPort);
 		ifcLoader.loadIfc(dataArray, firstModel, ({ arrayBuffer, properties }) => {
 			// we have 2 storage arrayBuffer(.frag file) and properties to use fragmentGroup in front end

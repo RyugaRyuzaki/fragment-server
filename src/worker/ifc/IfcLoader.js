@@ -45,13 +45,16 @@ export class IfcLoader {
 		if (!firstModel) {
 			await this.api.SetGeometryTransformation(modelID, coordinationMatrix);
 		}
-		await this.readAllGeometries(modelID);
+		this.readAllGeometries(modelID);
+		const geometryTime = performance.now();
+		console.log(`Geometry :${((geometryTime - before) / 1000).toFixed(3)} seconds`);
 
 		const items = this.geometryReader.items;
 		const model = await this.dataConverter.generate(items);
 		this.dataConverter.getModelProperties((properties) => {
-			console.log(`${((performance.now() - before) / 1000).toFixed(3)} seconds`);
 			this.api.CloseModel(modelID);
+			console.log(`Property :${((performance.now() - geometryTime) / 1000).toFixed(3)} seconds`);
+
 			callback({
 				arrayBuffer: this.exporter.export(model),
 				properties: properties,
@@ -63,10 +66,10 @@ export class IfcLoader {
 		this.dataConverter.cleanUp();
 	}
 
-	async readAllGeometries(modelID) {
-		// this.api.StreamAllMeshesWithTypes(modelID, [ WebIFC.IFCOPENINGELEMENT], (mesh) => {
-		// 	this.geometryReader.streamMesh(mesh);
-		// });
+	readAllGeometries(modelID) {
+		this.api.StreamAllMeshesWithTypes(modelID, [WebIFC.IFCSPACE], (mesh) => {
+			this.geometryReader.streamMesh(mesh);
+		});
 		this.api.StreamAllMeshes(modelID, (mesh) => {
 			this.geometryReader.streamMesh(mesh);
 		});

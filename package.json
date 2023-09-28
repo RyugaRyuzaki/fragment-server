@@ -30,7 +30,7 @@
         "three-mesh-bvh": "^0.6.4",
         "three-stdlib": "^2.25.0",
         "uuid": "^9.0.1",
-        "web-ifc": "^0.0.42",
+        "web-ifc": "^0.0.44",
         "worker-threads": "^1.0.0"
     },
     "devDependencies": {
