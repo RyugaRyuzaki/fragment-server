@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/upload", upload);
 app.use("/download", download);
+
 const server = http.createServer(app);
 server.listen(port, () => {
 	console.log(`Server is running on port :${port}`);
