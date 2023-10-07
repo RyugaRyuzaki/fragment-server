@@ -37,8 +37,8 @@ export class DataConverter {
 		this._itemKeyMap = {};
 	}
 
-	saveIfcCategories(webIfc) {
-		this.categories = this._ifcCategories.getAll(webIfc, 0);
+	saveIfcCategories(modelID) {
+		this.categories = this._ifcCategories.getAll(this.api, modelID);
 	}
 
 	async generate(geometries) {
@@ -105,13 +105,13 @@ export class DataConverter {
 		return new THREE.Matrix4().fromArray(coordArray);
 	}
 
-	async getModelProperties(callback) {
+	async getModelProperties(modelID, callback) {
 		this._propertyExporter.propertiesSerialized.on((properties) => {
 			this._model.properties = properties;
-			this._model.properties.spatialTree = this._spatialTree.itemsByFloor;
+			// this._model.properties.spatialTree = this._spatialTree.itemsByFloor;
 			callback(properties);
 		});
-		this._propertyExporter.export(this.api, 0);
+		this._propertyExporter.export(this.api, modelID);
 	}
 
 	createAllFragments(geometries) {

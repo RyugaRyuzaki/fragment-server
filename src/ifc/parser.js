@@ -3,7 +3,6 @@ import * as pako from "pako";
 import multer from "multer";
 import { Worker } from "worker_threads";
 import DeleteFile from "./util.js";
-const uploads = "uploads";
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		cb(null, uploads);
@@ -28,13 +27,22 @@ const upload = multer({
 	},
 });
 const root = "./src/ifc/";
+const uploads = "uploads";
 
+const storagePath = {
+	inputFile: (filename) => `${uploads}/${filename}`,
+	propertyFile: (originalname) => `${uploads}/${originalname}.gz`,
+	fragmentFile: (originalname) => `${uploads}/${originalname}frag.gz`,
+	PowerBIFile: (originalname) => `${uploads}/${originalname}powerbi.gz`,
+	fragmentWorker: `${root}fragment.js`,
+	PowerBIWorker: `${root}PowerBI.js`,
+};
 async function computeWorker(filename, firstModel) {
-	const filePath = "uploads/" + filename;
+	const filePath = storagePath.inputFile(filename);
 	const originalname = filename.split(".ifc")[0];
 	const fileData = fs.readFileSync(filePath);
 	const dataArray = new Uint8Array(fileData);
-	const worker = new Worker(root + "fragment.js", {
+	const worker = new Worker(fragmentWorker, {
 		workerData: { dataArray, firstModel },
 	});
 	// listen worker
@@ -42,8 +50,8 @@ async function computeWorker(filename, firstModel) {
 		if (result && arrayBuffer && properties) {
 			const compressedData = pako.deflate(JSON.stringify(properties));
 			const compressedFrag = pako.deflate(Buffer.from(arrayBuffer));
-			await fs.writeFileSync(uploads + "/" + originalname + ".gz", compressedData);
-			await fs.writeFileSync(uploads + "/" + originalname + "frag.gz", compressedFrag);
+			await fs.writeFileSync(storagePath.propertyFile(originalname), compressedData);
+			await fs.writeFileSync(storagePath.fragmentFile(originalname), compressedFrag);
 		}
 	});
 	// if error
@@ -58,12 +66,35 @@ async function computeWorker(filename, firstModel) {
 		}
 	});
 }
-// we can use pako npm to zip file, as you can see the ifc file 80mb and data when we zip ~12mb
-// so we can download easy and supper fast
-// i copy idea from xeokit
-// we can load from data and visualiz intersect wit diagram like barcha or circle
+async function computeWorkerPowerBI(filename) {
+	const filePath = storagePath.inputFile(filename);
+	const originalname = filename.split(".ifc")[0];
+	const fileData = fs.readFileSync(filePath);
+	const dataArray = new Uint8Array(fileData);
+	const worker = new Worker(storagePath.PowerBIWorker, {
+		workerData: dataArray,
+	});
+	// listen worker
+	worker.on("message", async ({ result, buffer }) => {
+		if (result && buffer) {
+			const compressedFrag = pako.deflate(Buffer.from(buffer));
+			await fs.writeFileSync(storagePath.PowerBIFile(originalname), compressedFrag);
+		}
+	});
+	// if error
 
-export default async function uploadFile(req, res) {
+	worker.on("error", async (error) => {
+		console.error("Error computing :", error);
+	});
+
+	worker.on("exit", async (code) => {
+		if (code !== 0) {
+			console.error("Worker was be stop by:", code);
+		}
+	});
+}
+
+export async function uploadFile(req, res) {
 	upload.single("file")(req, res, async (err) => {
 		if (err instanceof multer.MulterError) {
 			if (err.code == "LIMIT_FILE_SIZE") {
@@ -82,20 +113,22 @@ export default async function uploadFile(req, res) {
 		res.status(200).json({ filename, originalname });
 	});
 }
-// clone repo
-// install packages
-// run server : npm run dev
-// make sure install visual studio 2022
-// install office/sharepoint
-// open visual studio
-// create a project, choose template
-// wait some time to create a project
-// now project is loaded
-// we care about manifest file and xml file
-// now, run to test
-// we can not change width via code
-// let change some thing
-// because when we upload to server, we storage
-//1 ifc file
-//2 convert ifc to .frag
-// 3 properties of file to json
+export async function uploadFilePowerBI(req, res) {
+	upload.single("file")(req, res, async (err) => {
+		if (err instanceof multer.MulterError) {
+			if (err.code == "LIMIT_FILE_SIZE") {
+				err.message = "Limit size is" + 300 + "MB";
+			}
+			return res.status(405).json({ message: err.message, result: false });
+		} else if (err) {
+			return res.status(500).json({ message: err.message, result: false });
+		}
+		if (!req.file) {
+			return res.status(403).json({ message: "File not found", result: false });
+		}
+		const { filename, originalname } = req.file;
+		await computeWorkerPowerBI(filename);
+		DeleteFile(uploads, filename);
+		res.status(200).json({ filename, originalname });
+	});
+}

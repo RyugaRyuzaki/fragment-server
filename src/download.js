@@ -3,7 +3,7 @@ import fs from "fs";
 import * as pako from "pako";
 
 const router = express.Router();
-router.get("/:fileId", async (req, res) => {
+router.get("/download/:fileId", async (req, res) => {
 	try {
 		const { fileId } = req.params;
 		const { scope } = req.query;
@@ -17,6 +17,17 @@ router.get("/:fileId", async (req, res) => {
 		} else {
 			getFileWeb(res, fileId, buffer);
 		}
+	} catch (error) {
+		console.log(error);
+		res.status(500).json(error);
+	}
+});
+router.get("/downloadPowerBI/:fileId", async (req, res) => {
+	try {
+		const { fileId } = req.params;
+		if (!fileId) return res.status(405).json({ message: "Missing param" });
+		let buffer = fs.readFileSync("uploads/" + fileId + ".gz");
+		getFileWeb(res, fileId, buffer);
 	} catch (error) {
 		console.log(error);
 		res.status(500).json(error);

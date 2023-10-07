@@ -1,6 +1,7 @@
 import express from "express";
-import uploadFile from "./ifc/parser.js";
+import { uploadFile, uploadFilePowerBI } from "./ifc/parser.js";
 const router = express.Router();
 
-router.post("", uploadFile);
+router.post("/upload", uploadFile);
+router.post("/uploadPowerBI", uploadFilePowerBI);
 export default router;

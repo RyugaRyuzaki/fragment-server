@@ -30,8 +30,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/upload", upload);
-app.use("/download", download);
+app.use(upload);
+app.use(download);
 
 const server = http.createServer(app);
 server.listen(port, () => {

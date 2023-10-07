@@ -48,13 +48,12 @@ export class IfcLoader {
 		this.readAllGeometries(modelID);
 		const geometryTime = performance.now();
 		console.log(`Geometry :${((geometryTime - before) / 1000).toFixed(3)} seconds`);
-
 		const items = this.geometryReader.items;
+		this.dataConverter.saveIfcCategories(modelID);
 		const model = await this.dataConverter.generate(items);
-		this.dataConverter.getModelProperties((properties) => {
+		this.dataConverter.getModelProperties(modelID, (properties) => {
 			this.api.CloseModel(modelID);
 			console.log(`Property :${((performance.now() - geometryTime) / 1000).toFixed(3)} seconds`);
-
 			callback({
 				arrayBuffer: this.exporter.export(model),
 				properties: properties,
@@ -67,9 +66,9 @@ export class IfcLoader {
 	}
 
 	readAllGeometries(modelID) {
-		this.api.StreamAllMeshesWithTypes(modelID, [WebIFC.IFCSPACE], (mesh) => {
-			this.geometryReader.streamMesh(mesh);
-		});
+		// this.api.StreamAllMeshesWithTypes(modelID, [WebIFC.IFCSPACE], (mesh) => {
+		// 	this.geometryReader.streamMesh(mesh);
+		// });
 		this.api.StreamAllMeshes(modelID, (mesh) => {
 			this.geometryReader.streamMesh(mesh);
 		});
